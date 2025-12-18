@@ -1,0 +1,28 @@
+{
+  "name": "consent-track",
+  "version": "1.0.0",
+  "description": "Privacy-focused consent management and tracking application",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "client:build": "cd client && npm run build",
+    "build": "npm run client:build",
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "server:dev": "cd server && npm run dev",
+    "client:dev": "cd client && npm start",
+    "install:all": "npm install && cd client && npm install && cd ../server && npm install",
+    "test": "npm run test:server && npm run test:client",
+    "test:server": "cd server && npm test",
+    "test:client": "cd client && npm test"
+  },
+  "keywords": ["consent", "privacy", "gdpr", "tracking", "management"],
+  "author": "Consent Track Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
