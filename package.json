@@ -1,28 +1,23 @@
 {
-  "name": "consent-track",
-  "version": "1.0.0",
-  "description": "Privacy-focused consent management and tracking application",
+  "name": "consent-track-backend",
+  "version": "0.1.0",
+  "private": true,
   "main": "server.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "node server.js",
-    "client:build": "cd client && npm run build",
-    "build": "npm run client:build",
-    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
-    "server:dev": "cd server && npm run dev",
-    "client:dev": "cd client && npm start",
-    "install:all": "npm install && cd client && npm install && cd ../server && npm install",
-    "test": "npm run test:server && npm run test:client",
-    "test:server": "cd server && npm test",
-    "test:client": "cd client && npm test"
+    "dev": "node --watch server.js",
+    "test": "echo \"No tests specified\" && exit 0"
   },
-  "keywords": ["consent", "privacy", "gdpr", "tracking", "management"],
-  "author": "Consent Track Team",
-  "license": "MIT",
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=8.0.0"
-  },
-  "devDependencies": {
-    "concurrently": "^8.2.2"
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.20",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "qrcode": "^1.5.4",
+    "ws": "^8.18.0"
   }
 }
