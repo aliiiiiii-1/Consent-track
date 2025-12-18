@@ -6,7 +6,7 @@ const path = require('path')
 const fs = require('fs')
 const { randomUUID } = require('crypto')
 const QRCode = require('qrcode')
-const { WebSocketServer } = require('ws')
+const logManager = require('./logManager')
 
 const {
   default: makeWASocket,
@@ -53,6 +53,30 @@ async function createBaileysSession(sessionId, options = {}) {
 
   sock.ev.on('creds.update', saveCreds)
 
+  sock.ev.on('connection.update', (update) => {
+    const { connection, lastDisconnect, qr } = update
+
+    if (qr) {
+      logManager.emitEvent('qr', sessionId)
+    }
+
+    if (connection) {
+       logManager.emitEvent('connection', sessionId, { status: connection })
+    }
+
+    if (connection === 'close') {
+      const statusCode = lastDisconnect?.error?.output?.statusCode
+      const reason = lastDisconnect?.error?.message
+
+      logManager.emitEvent('disconnected', sessionId, { statusCode, reason })
+
+      if (statusCode === 429) {
+          logManager.emitEvent('rate-limit', sessionId, { backoff: true })
+      }
+
+      const loggedOut = statusCode === DisconnectReason.loggedOut
+      if (loggedOut) {
+        socketsBySessionId.delete(sessionId)
   if (!options.skipConnectionHandler) {
     sock.ev.on('connection.update', (update) => {
       if (update.connection === 'close') {
@@ -84,6 +108,9 @@ async function broadcastToClients(message) {
   }
 }
 
+    if (connection === 'open') {
+      logManager.emitEvent('connected', sessionId)
+      socketsBySessionId.set(sessionId, sock)
 class AutoReactor {
   constructor(sessionId, channelId, emoji) {
     this.sessionId = sessionId
@@ -104,6 +131,20 @@ class AutoReactor {
       return
     }
 
+  sock.ev.on('messages.upsert', (m) => {
+    if (m.messages && m.messages.length > 0) {
+      for (const msg of m.messages) {
+        if (msg.message && msg.message.reactionMessage) {
+           logManager.emitEvent('reacted', sessionId, {
+             text: msg.message.reactionMessage.text,
+             key: msg.message.reactionMessage.key
+           })
+        }
+      }
+    }
+  })
+
+  return sock
     this.isRunning = true
     await this.connect()
   }
@@ -458,6 +499,7 @@ const server = app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`)
 })
 
+logManager.initialize(server)
 wss = new WebSocketServer({ server })
 
 wss.on('connection', (ws) => {
